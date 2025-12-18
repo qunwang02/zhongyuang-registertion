@@ -101,7 +101,6 @@ async function startServer() {
       console.log(`📡 地址: http://localhost:${config.server.port}`);
       console.log(`📊 管理页面: http://localhost:${config.server.port}/admin`);
       console.log(`🔧 环境: ${config.server.env}`);
-      console.log(`🗄️ 数据库: ${config.mongodb.database}`);
     });
     
     // 优雅关闭
