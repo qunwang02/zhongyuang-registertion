@@ -12,8 +12,7 @@ class Database {
     try {
       if (this.isConnected) return this.db;
       
-      // 使用简化的配置
-      this.client = new MongoClient(config.mongodb.uri);
+      this.client = new MongoClient(config.mongodb.uri, config.mongodb.options);
       await this.client.connect();
       
       this.db = this.client.db(config.mongodb.database);
@@ -21,7 +20,17 @@ class Database {
       
       console.log('✅ MongoDB连接成功');
       
-async createIndexes() {
+      // 创建索引
+      await this.createIndexes();
+      
+      return this.db;
+    } catch (error) {
+      console.error('❌ MongoDB连接失败:', error);
+      throw error;
+    }
+  }
+
+  async createIndexes() {
     try {
       const records = this.db.collection('zhongyuan_records');
       
@@ -39,6 +48,7 @@ async createIndexes() {
     } catch (error) {
       console.error('❌ 创建索引失败:', error);
     }
+  }
 
   async disconnect() {
     try {
