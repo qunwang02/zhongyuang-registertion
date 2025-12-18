@@ -42,7 +42,10 @@ router.get('/api/test', async (req, res) => {
 
 // 提交登记数据
 router.post('/api/records', async (req, res) => {
+  console.log('📥 收到数据提交请求');
+  
   try {
+    // 首先确保数据库连接
     await database.connect();
     const recordsCollection = database.records();
     
@@ -55,9 +58,15 @@ router.post('/api/records', async (req, res) => {
       });
     }
     
-    // 为每条数据添加时间戳和状态
+    console.log(`📊 准备插入 ${data.length} 条数据`);
+    
+    // 确保数据格式正确
     const recordsWithMetadata = data.map(item => ({
       ...item,
+      // 确保金额是数字
+      amountTWD: Number(item.amountTWD) || 0,
+      amountRMB: Number(item.amountRMB) || 0,
+      // 添加元数据
       batchId: batchId || `batch_${Date.now()}`,
       deviceId: deviceId || 'unknown',
       submittedAt: new Date(),
@@ -67,10 +76,12 @@ router.post('/api/records', async (req, res) => {
       serverId: new ObjectId().toString()
     }));
     
-    // 批量插入数据
+    // 插入数据
     const result = await recordsCollection.insertMany(recordsWithMetadata);
     
-    // 记录操作日志
+    console.log(`✅ 成功插入 ${result.insertedCount} 条数据`);
+    
+    // 记录日志
     await database.logs().insertOne({
       type: 'record_submit',
       batchId: batchId,
