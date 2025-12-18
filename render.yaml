@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: donation-zhongyuan-system
+    name: zhongyuan-registration-system
     env: node
     buildCommand: npm install
     startCommand: npm start
@@ -10,6 +10,4 @@ services:
       - key: MONGODB_URI
         sync: false
       - key: PORT
-        value: 3000
-      - key: CORS_ORIGIN
-        value: "*"
+        value: 10000
