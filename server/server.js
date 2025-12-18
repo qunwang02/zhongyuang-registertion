@@ -11,6 +11,9 @@ const database = require('./database');
 // 创建Express应用
 const app = express();
 
+// 重要：信任代理（Render等云平台需要此配置）
+app.set('trust proxy', true);
+
 // 安全中间件
 app.use(helmet({
   contentSecurityPolicy: {
