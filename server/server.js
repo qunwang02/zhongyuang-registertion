@@ -71,8 +71,126 @@ app.get('/', (req, res) => {
 });
 
 // 管理页面路由
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/admin.html'));
+const adminPassword = req.query.password;
+  
+  // 从环境变量获取管理员密码，默认值为 "admin123"
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+  
+  if (adminPassword === ADMIN_PASSWORD) {
+    res.sendFile(path.join(__dirname, '../public/fosheng.html'));
+  } else {
+    // 如果没有密码或密码错误，显示密码输入页面
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="zh-TW">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>中元信息管理系统 - 管理员登录</title>
+          <style>
+              body {
+                  font-family: 'Microsoft JhengHei', Arial, sans-serif;
+                  background-color: #f5f5f5;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  height: 100vh;
+                  margin: 0;
+              }
+              .login-container {
+                  background-color: white;
+                  padding: 40px;
+                  border-radius: 10px;
+                  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                  text-align: center;
+                  max-width: 400px;
+                  width: 90%;
+              }
+              h1 {
+                  color: #2c3e50;
+                  margin-bottom: 30px;
+              }
+              .password-input {
+                  width: 100%;
+                  padding: 12px;
+                  margin-bottom: 20px;
+                  border: 1px solid #ddd;
+                  border-radius: 5px;
+                  font-size: 16px;
+                  box-sizing: border-box;
+              }
+              .password-input:focus {
+                  outline: none;
+                  border-color: #3498db;
+                  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+              }
+              .submit-btn {
+                  background-color: #3498db;
+                  color: white;
+                  border: none;
+                  padding: 12px 30px;
+                  border-radius: 5px;
+                  font-size: 16px;
+                  cursor: pointer;
+                  width: 100%;
+                  transition: background-color 0.3s;
+              }
+              .submit-btn:hover {
+                  background-color: #2980b9;
+              }
+              .error-message {
+                  color: #e74c3c;
+                  margin-top: 15px;
+                  display: none;
+              }
+              .footer-note {
+                  margin-top: 20px;
+                  color: #7f8c8d;
+                  font-size: 12px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="login-container">
+              <h1><i class="fas fa-lock"></i> 管理员登录</h1>
+              <p style="color: #7f8c8d; margin-bottom: 20px;">请输入管理员密码以访问管理后台</p>
+              
+              <form id="loginForm" action="/admin" method="GET">
+                  <input type="password" 
+                         class="password-input" 
+                         name="password" 
+                         placeholder="请输入管理员密码" 
+                         required>
+                  <button type="submit" class="submit-btn">
+                      <i class="fas fa-sign-in-alt"></i> 登录
+                  </button>
+              </form>
+              
+              ${req.query.password ? '<div class="error-message" id="errorMessage">密码错误，请重新输入</div>' : ''}
+              
+              <div class="footer-note">
+                  如需管理权限，请联系系统管理员
+              </div>
+          </div>
+          
+          <script>
+              // 显示错误信息
+              ${req.query.password ? 'document.getElementById("errorMessage").style.display = "block";' : ''}
+              
+              // 自动聚焦到密码输入框
+              document.querySelector('.password-input').focus();
+              
+              // 表单提交后清除URL中的错误参数（避免刷新时再次显示错误）
+              document.getElementById('loginForm').addEventListener('submit', function() {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('password');
+                window.history.replaceState({}, '', url);
+              });
+          </script>
+      </body>
+      </html>
+    `);
+  }
 });
 
 // 健康检查
