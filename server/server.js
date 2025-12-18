@@ -295,4 +295,33 @@ console.log(`🔧 Node版本: ${process.version}`);
 
 startServer();
 
+// 健康检查 - 显示数据库状态
+app.get('/health', async (req, res) => {
+  try {
+    await database.connect();
+    await database.db.command({ ping: 1 });
+    
+    // 获取记录数量
+    const recordsCollection = database.records();
+    const recordCount = await recordsCollection.countDocuments();
+    
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: 'connected',
+      recordCount: recordCount,
+      collections: await database.db.listCollections().toArray()
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'unhealthy', 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: 'disconnected',
+      error: error.message
+    });
+  }
+});
+
 module.exports = app;
