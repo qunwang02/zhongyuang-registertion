@@ -14,6 +14,16 @@ const app = express();
 // 重要：信任代理（Render等云平台需要此配置）
 app.set('trust proxy', true);
 
+// 捕获未捕获的异常
+process.on('uncaughtException', (error) => {
+  console.error('未捕获的异常:', error);
+});
+
+// 捕获未处理的Promise拒绝
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('未处理的Promise拒绝:', reason);
+});
+
 // 安全中间件
 app.use(helmet({
   contentSecurityPolicy: {
@@ -95,26 +105,28 @@ app.use((err, req, res, next) => {
 // 启动服务器
 async function startServer() {
   try {
-    // 连接数据库
-    await database.connect();
-
-// 捕获未捕获的异常
-process.on('uncaughtException', (error) => {
-  console.error('未捕获的异常:', error);
-});
-
-// 捕获未处理的Promise拒绝
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('未处理的Promise拒绝:', reason);
-});
+    console.log('🔧 开始启动服务器...');
+    console.log(`📂 环境: ${config.server.env}`);
+    console.log(`🔌 端口: ${config.server.port}`);
     
-    // 启动服务器
+    // 首先启动HTTP服务器
     const server = app.listen(config.server.port, () => {
-      console.log(`🚀 服务器启动成功`);
-      console.log(`📡 地址: http://localhost:${config.server.port}`);
+      console.log(`🚀 服务器启动成功，端口: ${config.server.port}`);
+      console.log(`🌐 访问地址: http://localhost:${config.server.port}`);
       console.log(`📊 管理页面: http://localhost:${config.server.port}/admin`);
-      console.log(`🔧 环境: ${config.server.env}`);
     });
+    
+    // 然后异步连接数据库（不阻塞服务器启动）
+    setTimeout(async () => {
+      try {
+        console.log('🔄 正在连接数据库...');
+        await database.connect();
+        console.log('✅ 数据库连接成功');
+      } catch (dbError) {
+        console.error('⚠️ 数据库连接失败，但服务器继续运行:', dbError.message);
+        console.log('ℹ️ 数据库相关功能将不可用，但静态文件和API仍可访问');
+      }
+    }, 1000); // 延迟1秒连接，确保服务器先启动
     
     // 优雅关闭
     const gracefulShutdown = async () => {
@@ -123,8 +135,12 @@ process.on('unhandledRejection', (reason, promise) => {
       server.close(async () => {
         console.log('✅ HTTP服务器已关闭');
         
-        await database.disconnect();
-        console.log('✅ 数据库连接已关闭');
+        try {
+          await database.disconnect();
+          console.log('✅ 数据库连接已关闭');
+        } catch (disconnectError) {
+          console.error('❌ 关闭数据库连接失败:', disconnectError.message);
+        }
         
         process.exit(0);
       });
@@ -139,12 +155,23 @@ process.on('unhandledRejection', (reason, promise) => {
     process.on('SIGTERM', gracefulShutdown);
     process.on('SIGINT', gracefulShutdown);
     
+    // 保持进程活跃
+    setInterval(() => {
+      console.log(`⏱️  服务器已运行 ${process.uptime().toFixed(0)} 秒`);
+    }, 60000); // 每分钟记录一次
+    
   } catch (error) {
     console.error('❌ 启动服务器失败:', error);
-    process.exit(1);
+    // 不要立即退出，给点时间记录错误
+    setTimeout(() => {
+      process.exit(1);
+    }, 5000);
   }
 }
 
-startServer();
+// 添加额外的日志来诊断启动过程
+console.log('📦 开始执行 server.js');
+console.log(`📁 当前目录: ${__dirname}`);
+console.log(`🔧 Node版本: ${process.version}`);
 
-module.exports = app;
+startServer();
