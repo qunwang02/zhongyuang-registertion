@@ -460,7 +460,9 @@
             <button id="syncData" class="btn btn-info" disabled>
                 <i class="fas fa-sync-alt"></i> 同步到服务器
             </button>
-
+          <button id="debugData" class="btn btn-info">
+        <i class="fas fa-bug"></i> 调试数据
+            </button>
         </div>
         
         <!-- 数据表格部分 -->
@@ -680,7 +682,25 @@
             document.getElementById('saveConfig').addEventListener('click', saveConfig);
             document.getElementById('closeModal').addEventListener('click', hideModal);
             document.getElementById('cancelConfig').addEventListener('click', hideModal);
-            
+            document.getElementById('debugData').addEventListener('click', debugData);
+
+            function debugData() {
+              const allData = getAllData();
+              console.log('🔍 调试数据:', allData);
+              
+              // 显示数据详情
+              let debugInfo = `共 ${allData.length} 条数据\n\n`;
+              allData.forEach((item, index) => {
+                debugInfo += `数据 ${index + 1}:\n`;
+                debugInfo += `  姓名: ${item.name}\n`;
+                debugInfo += `  项目: ${item.project}\n`;
+                debugInfo += `  金额TWD: ${item.amountTWD} (类型: ${typeof item.amountTWD})\n`;
+                debugInfo += `  金额RMB: ${item.amountRMB} (类型: ${typeof item.amountRMB})\n`;
+                debugInfo += `  localId: ${item.localId}\n\n`;
+              });
+              
+              alert(debugInfo);
+            }
             // 点击模态框外部关闭
             document.getElementById('configModal').addEventListener('click', function(e) {
                 if (e.target === this) hideModal();
