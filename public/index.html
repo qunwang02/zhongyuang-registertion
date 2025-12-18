@@ -460,9 +460,7 @@
             <button id="syncData" class="btn btn-info" disabled>
                 <i class="fas fa-sync-alt"></i> 同步到服务器
             </button>
-          <button id="goToAdmin" class="btn btn-warning">
-                <i class="fas fa-chart-bar"></i> 查看管理后台
-            </button>
+
         </div>
         
         <!-- 数据表格部分 -->
@@ -672,7 +670,7 @@
             document.getElementById('exportCSV').addEventListener('click', exportToCSV);
             document.getElementById('loadData').addEventListener('click', loadFromLocalStorage);
             document.getElementById('clearAll').addEventListener('click', clearAllData);
-            document.getElementById('goToAdmin').addEventListener('click', () => window.location.href = '/fosheng');
+  
             
             // 新增服务器相关事件
             document.getElementById('testConnection').addEventListener('click', testServerConnection);
