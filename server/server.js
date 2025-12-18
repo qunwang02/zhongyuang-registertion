@@ -12,7 +12,7 @@ const database = require('./database');
 const app = express();
 
 // 重要：信任代理（Render等云平台需要此配置）
-app.set('trust proxy', true);
+app.set('trust proxy', true,1);
 
 // 捕获未捕获的异常
 process.on('uncaughtException', (error) => {
@@ -51,13 +51,15 @@ app.use(morgan(config.server.env === 'development' ? 'dev' : 'combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 速率限制
+// 速率限制 - 暂时注释掉，以避免 trust proxy 错误
+/*
 const limiter = rateLimit({
   windowMs: config.server.rateLimit.windowMs,
   max: config.server.rateLimit.max,
   message: { error: '请求过于频繁，请稍后再试' }
 });
 app.use('/api/', limiter);
+*/
 
 // 静态文件服务
 app.use(express.static(path.join(__dirname, '../public')));
