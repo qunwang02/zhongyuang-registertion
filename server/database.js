@@ -21,17 +21,7 @@ class Database {
       
       console.log('✅ MongoDB连接成功');
       
-      // 创建索引
-      await this.createIndexes();
-      
-      return this.db;
-    } catch (error) {
-      console.error('❌ MongoDB连接失败:', error);
-      throw error;
-    }
-  }
-
-  async function createIndexes() {
+async function createIndexes() {
   try {
     const records = this.db.collection('zhongyuan_records');
     
