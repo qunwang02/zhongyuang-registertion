@@ -12,7 +12,8 @@ class Database {
     try {
       if (this.isConnected) return this.db;
       
-      this.client = new MongoClient(config.mongodb.uri, config.mongodb.options);
+      // 使用简化的配置
+      this.client = new MongoClient(config.mongodb.uri);
       await this.client.connect();
       
       this.db = this.client.db(config.mongodb.database);
