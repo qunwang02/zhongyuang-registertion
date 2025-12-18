@@ -2,9 +2,9 @@
   "name": "zhongyuan-registration-system",
   "version": "1.0.0",
   "description": "中元信息登记系统",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node index.js",
     "dev": "nodemon server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
