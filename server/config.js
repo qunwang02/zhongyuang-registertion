@@ -14,7 +14,7 @@ const config = {
     }
   },
   
-  // 服务器配置
+// 服务器配置
   server: {
     port: process.env.PORT || 3000,
     env: process.env.NODE_ENV || 'development',
