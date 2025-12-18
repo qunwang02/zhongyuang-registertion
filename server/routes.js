@@ -507,4 +507,59 @@ router.post('/api/records', async (req, res) => {
     });
   }
 });
+
+// 测试数据插入
+router.post('/api/test/insert', async (req, res) => {
+  try {
+    await database.connect();
+    const recordsCollection = database.records();
+    
+    const testData = {
+      name: "测试用户",
+      project: "副总功德主",
+      method: "超荐消业共修(七天)-莲位-附 超荐莲位 贰座",
+      content: "测试祈福内容",
+      payment: "已缴费",
+      contact: "测试联系人",
+      amountTWD: 80000,
+      amountRMB: 80000 / 4.2,
+      localId: `test_${Date.now()}`,
+      createTime: new Date().toISOString(),
+      rowIndex: 1,
+      batchId: 'test_batch',
+      deviceId: 'test_device',
+      submittedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      syncStatus: 'synced',
+      serverId: new ObjectId().toString()
+    };
+    
+    console.log('🧪 测试数据:', testData);
+    
+    const result = await recordsCollection.insertOne(testData);
+    
+    console.log('✅ 测试数据插入成功，ID:', result.insertedId);
+    
+    // 验证数据是否真的存在
+    const insertedData = await recordsCollection.findOne({ _id: result.insertedId });
+    
+    res.json({
+      success: true,
+      message: '测试数据插入成功',
+      insertedId: result.insertedId,
+      data: insertedData,
+      count: await recordsCollection.countDocuments()
+    });
+    
+  } catch (error) {
+    console.error('❌ 测试数据插入失败:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      stack: error.stack 
+    });
+  }
+});
+
 module.exports = router;
