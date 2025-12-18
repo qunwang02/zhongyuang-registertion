@@ -573,4 +573,61 @@ router.post('/api/test/insert', async (req, res) => {
   }
 });
 
+// 测试端点：验证数据存储
+router.post('/api/debug-submit', async (req, res) => {
+  console.log('=== 调试数据提交开始 ===');
+  console.log('请求体:', JSON.stringify(req.body));
+  
+  try {
+    await database.connect();
+    const recordsCollection = database.records();
+    
+    const testData = {
+      name: "调试用户" + Date.now(),
+      project: "副总功德主",
+      method: "测试方法",
+      content: "测试内容",
+      payment: "已缴费",
+      contact: "测试联系人",
+      amountTWD: 80000,
+      amountRMB: 19047.62,
+      localId: "debug_" + Date.now(),
+      createdAt: new Date(),
+      submittedAt: new Date(),
+      deviceId: "debug-device"
+    };
+    
+    console.log('准备插入测试数据:', testData);
+    
+    const result = await recordsCollection.insertOne(testData);
+    
+    console.log('插入结果:', result);
+    console.log('插入ID:', result.insertedId);
+    
+    // 验证插入的数据
+    const insertedData = await recordsCollection.findOne({ _id: result.insertedId });
+    console.log('插入的数据:', insertedData);
+    
+    const totalCount = await recordsCollection.countDocuments();
+    console.log('当前总记录数:', totalCount);
+    
+    console.log('=== 调试数据提交结束 ===');
+    
+    res.json({
+      success: true,
+      message: '调试数据插入成功',
+      insertedId: result.insertedId,
+      data: insertedData,
+      totalCount: totalCount
+    });
+    
+  } catch (error) {
+    console.error('调试数据提交失败:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
