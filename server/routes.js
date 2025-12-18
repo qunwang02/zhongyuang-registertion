@@ -406,4 +406,105 @@ router.get('/api/export/csv', async (req, res) => {
   }
 });
 
+// 提交登记数据
+router.post('/api/records', async (req, res) => {
+  try {
+    console.log('📥 收到数据提交请求');
+    console.log('📦 请求体大小:', JSON.stringify(req.body).length, '字节');
+    
+    await database.connect();
+    const recordsCollection = database.records();
+    
+    const { data, batchId, deviceId } = req.body;
+    
+    if (!data || !Array.isArray(data)) {
+      console.error('❌ 数据格式错误:', req.body);
+      return res.status(400).json({ 
+        success: false, 
+        error: '无效的数据格式' 
+      });
+    }
+    
+    console.log(`📊 准备插入 ${data.length} 条数据`);
+    
+    // 详细记录接收到的数据
+    console.log('📋 第一条数据示例:', JSON.stringify(data[0]));
+    
+    // 为每条数据添加时间戳和状态
+    const recordsWithMetadata = data.map(item => {
+      const record = {
+        ...item,
+        batchId: batchId || `batch_${Date.now()}`,
+        deviceId: deviceId || 'unknown',
+        submittedAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        syncStatus: 'synced',
+        serverId: new ObjectId().toString()
+      };
+      
+      // 确保金额字段为数字
+      if (typeof record.amountTWD === 'string') {
+        record.amountTWD = parseFloat(record.amountTWD) || 0;
+      }
+      if (typeof record.amountRMB === 'string') {
+        record.amountRMB = parseFloat(record.amountRMB) || 0;
+      }
+      
+      return record;
+    });
+    
+    console.log('✅ 数据预处理完成');
+    console.log('📝 第一条处理后的数据:', JSON.stringify(recordsWithMetadata[0]));
+    
+    // 批量插入数据
+    const result = await recordsCollection.insertMany(recordsWithMetadata);
+    
+    console.log(`✅ 成功插入 ${result.insertedCount} 条数据`);
+    console.log('📌 插入的ID:', result.insertedIds);
+    
+    // 记录操作日志
+    await database.logs().insertOne({
+      type: 'record_submit',
+      batchId: batchId,
+      count: recordsWithMetadata.length,
+      insertedCount: result.insertedCount,
+      deviceId: deviceId,
+      timestamp: new Date(),
+      ip: req.ip
+    });
+    
+    res.json({
+      success: true,
+      message: `成功提交 ${result.insertedCount} 条数据`,
+      submittedCount: result.insertedCount,
+      batchId: batchId,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ 提交数据错误:', error);
+    console.error('❌ 错误堆栈:', error.stack);
+    
+    // 记录错误日志
+    if (database.db) {
+      try {
+        await database.logs().insertOne({
+          type: 'record_submit_error',
+          error: error.message,
+          timestamp: new Date(),
+          ip: req.ip,
+          bodySize: JSON.stringify(req.body).length
+        });
+      } catch (logError) {
+        console.error('❌ 记录错误日志失败:', logError);
+      }
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
 module.exports = router;
