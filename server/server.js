@@ -97,6 +97,16 @@ async function startServer() {
   try {
     // 连接数据库
     await database.connect();
+
+// 捕获未捕获的异常
+process.on('uncaughtException', (error) => {
+  console.error('未捕获的异常:', error);
+});
+
+// 捕获未处理的Promise拒绝
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('未处理的Promise拒绝:', reason);
+});
     
     // 启动服务器
     const server = app.listen(config.server.port, () => {
