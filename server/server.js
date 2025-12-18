@@ -155,9 +155,7 @@ const adminPassword = req.query.password;
               <h1><i class="fas fa-lock"></i> 管理员登录</h1>
               <p style="color: #7f8c8d; margin-bottom: 20px;">请输入管理员密码以访问管理后台</p>
               
-              <form id="loginForm" action="/admin" method="GET">
-                  <input type="password" 
-                         class="password-input" 
+              <form id="loginForm" action="fosheng" method="GET">              <form id="loginForm" action="fo " method="GET"        class="password-input" 
                          name="password" 
                          placeholder="请输入管理员密码" 
                          required>
