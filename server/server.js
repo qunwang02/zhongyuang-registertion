@@ -70,8 +70,9 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// 管理页面路由
-const adminPassword = req.query.password;
+// 管理页面路由（文件名已改为 fosheng.html） - 添加密码验证
+app.get('/admin', (req, res) => {
+  const adminPassword = req.query.password;
   
   // 从环境变量获取管理员密码，默认值为 "admin123"
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
@@ -155,7 +156,9 @@ const adminPassword = req.query.password;
               <h1><i class="fas fa-lock"></i> 管理员登录</h1>
               <p style="color: #7f8c8d; margin-bottom: 20px;">请输入管理员密码以访问管理后台</p>
               
-              <form id="loginForm" action="fosheng" method="GET">              <form id="loginForm" action="fo " method="GET"        class="password-input" 
+              <form id="loginForm" action="/admin" method="GET">
+                  <input type="password" 
+                         class="password-input" 
                          name="password" 
                          placeholder="请输入管理员密码" 
                          required>
@@ -291,3 +294,5 @@ console.log(`📁 当前目录: ${__dirname}`);
 console.log(`🔧 Node版本: ${process.version}`);
 
 startServer();
+
+module.exports = app;
