@@ -31,25 +31,36 @@ class Database {
     }
   }
 
-  async createIndexes() {
-    try {
-      const records = this.db.collection('zhongyuan_records');
-      
-      // 创建索引以提高查询性能
-      await records.createIndex({ localId: 1 }, { unique: true });
-      await records.createIndex({ createdAt: -1 });
-      await records.createIndex({ name: 1 });
-      await records.createIndex({ project: 1 });
-      await records.createIndex({ submittedAt: -1 });
-      await records.createIndex({ deviceId: 1 });
-      await records.createIndex({ syncStatus: 1 });
-      await records.createIndex({ payment: 1 });
-      
-      console.log('✅ MongoDB索引创建成功');
-    } catch (error) {
-      console.error('❌ 创建索引失败:', error);
-    }
+  async function createIndexes() {
+  try {
+    const records = this.db.collection('zhongyuan_records');
+    
+    console.log('🔧 开始创建索引...');
+    
+    // 创建索引以提高查询性能
+    await records.createIndex({ localId: 1 }, { unique: true, sparse: true });
+    await records.createIndex({ createdAt: -1 });
+    await records.createIndex({ name: 1 });
+    await records.createIndex({ project: 1 });
+    await records.createIndex({ submittedAt: -1 });
+    await records.createIndex({ deviceId: 1 });
+    await records.createIndex({ syncStatus: 1 });
+    await records.createIndex({ payment: 1 });
+    
+    // 添加金额字段索引
+    await records.createIndex({ amountTWD: 1 });
+    await records.createIndex({ amountRMB: 1 });
+    
+    console.log('✅ MongoDB索引创建成功');
+    
+    // 显示现有索引
+    const indexes = await records.indexes();
+    console.log(`📊 集合现有 ${indexes.length} 个索引`);
+    
+  } catch (error) {
+    console.error('❌ 创建索引失败:', error);
   }
+}
 
   async disconnect() {
     try {
