@@ -11,6 +11,9 @@ const database = require('./database');
 // 创建Express应用
 const app = express();
 
+// 重要：添加信任代理设置（放在所有中间件之前）
+app.set('trust proxy', 1); // 信任第一个代理
+
 // 安全中间件
 app.use(helmet({
   contentSecurityPolicy: {
