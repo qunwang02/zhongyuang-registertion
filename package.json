@@ -8,7 +8,7 @@
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
     "prestart": "npm install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  /*  "test": "echo \"Error: no test specified\" && exit 1"/*
 },
 "dependencies": {
 "express": "^4.18.2",
